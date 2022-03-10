@@ -1,5 +1,12 @@
 // Commits
 
+5. Added basic users functionality
+  - added User model
+  - added users-routes.js
+  - added users-controller 
+    // get users func
+    // users signup & login functions
+
 4. Added CORS settings
 
 3. Added basic index.js configuration
