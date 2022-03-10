@@ -1,5 +1,7 @@
 // Commits
 
+4. Added CORS settings
+
 3. Added basic index.js configuration
   - added start script for nodemon
 
