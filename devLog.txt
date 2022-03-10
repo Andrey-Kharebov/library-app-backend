@@ -1,5 +1,8 @@
 // Commits
 
+3. Added basic index.js configuration
+  - added start script for nodemon
+
 2. Added basic packages
   - npm i --save express mongoose body-parser 
     // express - for server creation
