@@ -1,3 +1,12 @@
 // Commits
 
+2. Added basic packages
+  - npm i --save express mongoose body-parser 
+    // express - for server creation
+    // mongoose - for connecting to mongoDB & createing models
+    // body-parser - processes application/x-www-form-urlencoded & application/json request's bodies and creates req.body for them
+  - npm i --save-dev nodemon 
+    // nodemon - allows to automatically restart our server if we changed anything in our code
+  - added .gitignore
+
 1. Initial commit
