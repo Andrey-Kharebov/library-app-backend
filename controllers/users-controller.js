@@ -1,3 +1,5 @@
+const HttpError = require('../helpers/http-error')
+
 const User = require('../models/user')
 
 const getUsers = async (req, res, next) => {
@@ -6,7 +8,7 @@ const getUsers = async (req, res, next) => {
   try {
     users = await User.find({}, '-password')
   } catch (err) {
-    const error = new Error('Fetching users failed, please try again later.', 500)
+    const error = new HttpError('Fetching users failed, please try again later.', 500)
     return next(error)
   }
 
@@ -21,12 +23,12 @@ const signup = async (req, res, next) => {
   try {
     existingUser = await User.findOne({ email })
   } catch (err) {
-    const error = new Error('Signing up failed, please try again later.', 500)
+    const error = new HttpError('Signing up failed, please try again later.', 500)
     return next(error)
   }
 
   if (existingUser) {
-    const error = new Error('User exists already, please login instead.', 422)
+    const error = new HttpError('User already exists, please login instead.', 422)
     return next(error)
   }
 
@@ -39,7 +41,7 @@ const signup = async (req, res, next) => {
   try {
     await newUser.save()
   } catch (err) {
-    const error = new HttpError('Signing up failed, please try again', 500)
+    const error = new HttpError('Signing up failed, please try again later.', 500)
     return next(error)
   }
 
@@ -53,12 +55,12 @@ const login = async (req, res, next) => {
   try {
     existingUser = await User.findOne({ email })
   } catch (err) {
-    const error = new Error('Logging failed, please try again later.', 500)
+    const error = new HttpError('Logging failed, please try again later.', 500)
     return next(error)
   }
 
   if (!existingUser || existingUser.password !== password) {
-    const error = new Error('Invalid credentials, could not log you in.', 401)
+    const error = new HttpError('Invalid credentials, could not log you in.', 401)
     return next(error)
   }
 

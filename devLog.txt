@@ -1,5 +1,10 @@
 // Commits
 
+6. Added proper error handling
+  - added HttpError.js helper
+  - added error handling in users-controller
+  - added error handling in main index.js
+
 5. Added basic users functionality
   - added User model
   - added users-routes.js
