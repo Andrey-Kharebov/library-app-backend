@@ -1,5 +1,12 @@
 // Commits
 
+7. Added hashing & tokens functionality
+  - npm i --save bcryptjs - library that helps us to create secure hashed passwords
+  - npm i --save jsonwebtoken - library that allows us to generate tokens with private key
+  - hashed passwords now creates during signing up
+  - hashed passwords comparison during loggin in
+  - creting tokens after signing up and loggin in
+
 6. Added proper error handling
   - added HttpError.js helper
   - added error handling in users-controller
