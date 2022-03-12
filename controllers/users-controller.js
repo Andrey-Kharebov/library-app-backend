@@ -63,7 +63,7 @@ const signup = async (req, res, next) => {
   // 3 argument (optional) - expiration timer (if the token will be stolen, there will be a short time the hackers can do anything with it)
   try {
     token = jwt.sign( 
-      { userId: newUser._id, email: newUser.email }, 
+      { userId: newUser.id, email: newUser.email }, 
       'supersecret_dont_share', // should be the same for login & signup
       { expiresIn: '1h' }
     ) 
@@ -72,7 +72,7 @@ const signup = async (req, res, next) => {
     return next(error)
   }
 
-  res.status(200).json({ userId: newUser._id, email: newUser.email, token: token })
+  res.status(200).json({ userId: newUser.id, email: newUser.email, token: token })
 }
 
 const login = async (req, res, next) => {
@@ -111,7 +111,7 @@ const login = async (req, res, next) => {
   // 3 argument (optional) - expiration timer (if the token will be stolen, there will be a short time the hackers can do anything with it)
   try {
     token = jwt.sign( 
-      { userId: existingUser._id, email: existingUser.email }, 
+      { userId: existingUser.id, email: existingUser.email }, 
       'supersecret_dont_share', // should be the same for login & signup
       { expiresIn: '1h' }
     ) 
@@ -120,7 +120,7 @@ const login = async (req, res, next) => {
     return next(error)
   }
 
-  res.json({ userId: existingUser._id, email: existingUser.email, token: token })
+  res.json({ userId: existingUser.id, email: existingUser.email, token: token })
 }
 
 exports.getUsers = getUsers

@@ -1,5 +1,8 @@
 // Commits
 
+8. Added check-auth middleware 
+  - for preventing access to routes if not authorized
+
 7. Added hashing & tokens functionality
   - npm i --save bcryptjs - library that helps us to create secure hashed passwords
   - npm i --save jsonwebtoken - library that allows us to generate tokens with private key
