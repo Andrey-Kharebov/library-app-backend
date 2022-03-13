@@ -36,7 +36,8 @@ app.use((error, req, res, next) => { // this function will activates only in cas
 })
 
 mongoose
-  .connect('mongodb+srv://Andrey:w4oHzEqQbJlQZqN5@library-app-cluster.ojgsg.mongodb.net/libraryApp?retryWrites=true&w=majority')
+  // .connect('mongodb+srv://Andrey:w4oHzEqQbJlQZqN5@library-app-cluster.ojgsg.mongodb.net/libraryApp?retryWrites=true&w=majority')
+  .connect('mongodb://localhost:27017/library-app')
   .then(() => {
     app.listen(9000)
     console.log('App started on PORT 9000')

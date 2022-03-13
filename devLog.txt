@@ -1,5 +1,14 @@
 // Commits
 
+9. Installed mongoDB locally
+  // https://youtu.be/xwr3azx0Gf0
+  - brew tap mongodb/brew
+  - brew install mongodb-community
+  - brew services start mongodb-community (optional)
+  - installed MongoDB Compass from MongoDB site
+  // https://codingstatus.com/connect-mongodb-with-node-js-using-mongoose/
+  - added connection to local mongo db
+
 8. Added check-auth middleware 
   - for preventing access to routes if not authorized
 
