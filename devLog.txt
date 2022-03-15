@@ -1,5 +1,8 @@
 // Commits
 
+10. Added languages routes & controller
+  - added get languages & createLanguage route 
+
 9. Installed mongoDB locally
   // https://youtu.be/xwr3azx0Gf0
   - brew tap mongodb/brew
