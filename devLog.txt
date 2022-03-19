@@ -1,5 +1,7 @@
 // Commits
 
+13. Added deleteLanguage route 
+
 12. Added wordsListSeparator func.
 
 11. Added getLanguageById and saveWordsList func.
