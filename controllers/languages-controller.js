@@ -2,6 +2,7 @@ const HttpError = require('../helpers/http-error')
 
 const User = require('../models/user')
 const Language = require('../models/language')
+const wordsListSeparator = require('../helpers/LanguagesHelpers/wordsListSeparator')
 
 const getLanguages = async (req, res, next) => { 
   // returns languages list for main subs and full first language for first active main tab
@@ -128,7 +129,7 @@ const saveWordsList = async (req, res, next) => {
     return next(error)
   } 
 
-  languageObj.wordsList = wordsList
+  languageObj.wordsList = wordsListSeparator(wordsList)
 
   try {
     await languageObj.save()
