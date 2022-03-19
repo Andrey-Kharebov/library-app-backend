@@ -1,5 +1,7 @@
 // Commits
 
+11. Added getLanguageById and saveWordsList func.
+
 10. Added languages routes & controller
   - added get languages & createLanguage route 
 

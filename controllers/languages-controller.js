@@ -1,64 +1,146 @@
 const HttpError = require('../helpers/http-error')
 
 const User = require('../models/user')
+const Language = require('../models/language')
 
-const getLanguages = async (req, res, next) => {
+const getLanguages = async (req, res, next) => { 
+  // returns languages list for main subs and full first language for first active main tab
   const id = req.userData.userId
 
-  let user
-  let languagesList 
+  let languages = []
+  let firstLanguage
 
   try {
-    user = await User.findById(id).select('languages')
+    languages = await Language.find({ creator: id }).select('title')
   } catch (err) {
     const error = new HttpError('Fetching languages failed, please try again later.', 500)
     return next(error)
   }
 
-  languagesList = user.languages
 
-  res.status(200).json({ languagesList })
+  if (languages) {
+    try {
+      firstLanguage = await Language.findOne()
+    } catch (err) {
+      const error = new HttpError('Fetching languages failed, please try again later.', 500)
+      return next(error)
+    }
+  }
+  
+
+  const languagesData = {
+    languagesTitlesList: languages,
+    languagesObjs: firstLanguage ? [firstLanguage] : []
+  }
+
+  // console.log(languagesData)
+  res.status(200).json({ languagesData })
+} 
+
+const getLanguageById = async (req, res, next) => {
+  const id = req.userData.userId
+  const { languageId } = req.params
+
+  let languageObj 
+
+  try {
+    languageObj = await Language.findById(languageId)
+  } catch (err) {
+    const error = new HttpError('Fetching language failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!languageObj) {
+    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    return next(error)
+  } 
+
+  
+  res.status(200).json({ languageObj })
 }
 
 const createLanguage = async (req, res, next) => {
+  // creates new language and returns it's title obj for languages list for main subs and full language obj
+
   const id = req.userData.userId
   const { title } = req.body 
-  
+
   if (title === '') {
     const error = new HttpError('Language title can\'t be empty!', 500)
     return next(error)
-  }
+  } 
 
   let user
   let existingLanguage 
 
   try {
     user = await User.findById(id).select('languages')
-    existingLanguage = user.languages.find(l => l.toLowerCase() === title.toLowerCase())
+    existingLanguage = await Language.findOne({ creator: id, title: title })
   } catch (err) {
-    const error = new HttpError('Fetching languages failed, please try again later.', 500)
-    return next(error)
-  } 
-
-  if (existingLanguage) {
-    const error = new HttpError('Language with this title is already exists.', 500)
+    const error = new HttpError('Creating language failed, could not find a user with this id.', 500)
     return next(error)
   }
 
-  user.languages.push(title)
+  if (existingLanguage) {
+    const error = new HttpError('Language with this title is already exist, please use that one.', 422)
+    return next(error)
+  }
 
+  const newLanguage = new Language({
+    title,
+    wordsList: '',
+    creator: user._id
+  })  
+
+  user.languages.push(newLanguage)
+  
   try {
-    user.save()
+    await newLanguage.save()
+    await user.save()
   } catch (err) {
     const error = new HttpError('Something went wrong, could not create lanugage', 500)
     return next(error)
   } 
 
-  const languagesList = user.languages
- 
-  res.status(200).json({ languagesList })
+  const newLanguageData = {
+    newLanguageTitle: { _id: newLanguage._id, title: newLanguage.title },
+    newLanguageObj: newLanguage
+  }
+
+  res.status(200).json({ newLanguageData })
 }
 
+const saveWordsList = async (req, res, next) => {
+  const { languageId } = req.params
+  const { wordsList } = req.body
+
+  let languageObj 
+
+  try {
+    languageObj = await Language.findById(languageId)
+  } catch (err) {
+    const error = new HttpError('Finding language failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!languageObj) {
+    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    return next(error)
+  } 
+
+  languageObj.wordsList = wordsList
+
+  try {
+    await languageObj.save()
+  } catch (err) {
+    const error = new HttpError('Words list updating failed, please try again later.', 404) 
+    return next(error)
+  }
+  
+  res.status(200).json({ languageObj })
+}
 
 exports.getLanguages = getLanguages
+exports.getLanguageById = getLanguageById
 exports.createLanguage = createLanguage
+exports.saveWordsList = saveWordsList
