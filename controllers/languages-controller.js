@@ -157,17 +157,23 @@ const saveWordsList = async (req, res, next) => {
     const error = new HttpError('Could not find a language for the provided id.', 404) 
     return next(error)
   } 
+  
 
-  languageObj.wordsList = wordsListSeparator(wordsList)
-
+  languageObj.wordsList =  wordsListSeparator(wordsList)
+  
   try {
     await languageObj.save()
   } catch (err) {
     const error = new HttpError('Words list updating failed, please try again later.', 404) 
     return next(error)
   }
+
+  const languageData = {
+    languageTitle: { _id: languageObj._id, title: languageObj.title },
+    wordsList: languageObj.wordsList
+  }
   
-  res.status(200).json({ languageObj })
+  res.status(200).json({ languageData })
 }
 
 exports.getLanguages = getLanguages

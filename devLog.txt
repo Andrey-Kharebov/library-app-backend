@@ -1,5 +1,8 @@
 // Commits
 
+14. Edited saveWordsList func.
+  - new languageObj with wordsList for return
+
 13. Added deleteLanguage route 
 
 12. Added wordsListSeparator func.
