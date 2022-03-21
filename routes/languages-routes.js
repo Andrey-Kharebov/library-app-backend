@@ -13,6 +13,7 @@ router.post('/', languagesController.createLanguage)
 router.delete('/:languageId', languagesController.deleteLanguage)
 
 router.patch('/:languageId/wordsList', languagesController.saveWordsList)
+router.post('/:languageId/wordsPack', languagesController.createWordsPack)
 
 module.exports = router
 

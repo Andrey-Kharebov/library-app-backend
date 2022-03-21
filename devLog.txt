@@ -1,5 +1,12 @@
 // Commits
 
+15. Added creating words pack func.
+  - added wordsPack model 
+  - added packedWordsRemover & wordsPackArrPreparer helpers
+  - added createWordsPack route
+  - changed getLanguages & getLanguageById routes given this new functionality 
+  - when language deletes, it's wordsPacks delete too
+
 14. Edited saveWordsList func.
   - new languageObj with wordsList for return
 

@@ -8,3 +8,7 @@ const UserSchema = new Schema({
 })
 
 module.exports = model('User', UserSchema)
+
+
+
+// added remove wordspacks functionality when removes language

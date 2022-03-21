@@ -1,8 +1,12 @@
 const HttpError = require('../helpers/http-error')
 
+const wordsListSeparator = require('../helpers/LanguagesHelpers/wordsListSeparator')
+const wordsPackArrPreparer = require('../helpers/LanguagesHelpers/wordsPackArrPreparer')
+const packedWordsRemover = require('../helpers/LanguagesHelpers/packedWordsRemover')
+
 const User = require('../models/user')
 const Language = require('../models/languages/language')
-const wordsListSeparator = require('../helpers/LanguagesHelpers/wordsListSeparator')
+const WordsPack = require('../models/languages/wordsPack')
 
 const getLanguages = async (req, res, next) => { 
   // returns languages list for main subs and full first language for first active main tab
@@ -10,6 +14,7 @@ const getLanguages = async (req, res, next) => {
 
   let languages = []
   let firstLanguage
+  let wordsPacks
 
   try {
     languages = await Language.find({ creator: id }).select('title')
@@ -28,13 +33,22 @@ const getLanguages = async (req, res, next) => {
     }
   }
   
+  if (firstLanguage) {
+    try {
+      wordsPacks = await WordsPack.find({ language: firstLanguage._id })
+    } catch (err) {
+      const error = new HttpError('Fetching words packs failed, please try again later.', 500)
+      return next(error)
+    }
+  }
+
+  if (wordsPacks) firstLanguage.wordsPacks = wordsPacks
 
   const languagesData = {
     languagesTitlesList: languages,
     languagesObjs: firstLanguage ? [firstLanguage] : []
   }
 
-  // console.log(languagesData)
   res.status(200).json({ languagesData })
 } 
 
@@ -43,6 +57,7 @@ const getLanguageById = async (req, res, next) => {
   const { languageId } = req.params
 
   let languageObj 
+  let wordsPacks
 
   try {
     languageObj = await Language.findById(languageId)
@@ -55,6 +70,17 @@ const getLanguageById = async (req, res, next) => {
     const error = new HttpError('Could not find language for provided id.', 404) 
     return next(error)
   } 
+
+  if (languageObj) {
+    try {
+      wordsPacks = await WordsPack.find({ language: languageObj._id })
+    } catch (err) {
+      const error = new HttpError('Fetching words packs failed, please try again later.', 500)
+      return next(error)
+    }
+  }
+
+  languageObj.wordsPacks = wordsPacks
   
   res.status(200).json({ languageObj })
 }
@@ -89,7 +115,11 @@ const createLanguage = async (req, res, next) => {
   const newLanguage = new Language({
     title,
     wordsList: '',
-    creator: user._id
+    wordsPacks: [],
+    creator: user._id,
+    config: {
+      lastWordsPackNumber: 0
+    },
   })  
 
   user.languages.push(newLanguage)
@@ -114,7 +144,8 @@ const deleteLanguage = async (req, res, next) => {
   const userId = req.userData.userId
   const { languageId } = req.params
   
-  let languageObj 
+  let languageObj
+  let wordPacks
 
   try {
     languageObj = await Language.findById(languageId).populate('creator')
@@ -131,6 +162,7 @@ const deleteLanguage = async (req, res, next) => {
   try {
     await languageObj.creator.languages.pull(languageObj)
     await languageObj.creator.save()
+    await WordsPack.deleteMany({ language: languageObj._id })
     await languageObj.remove()
   } catch (err) {
     const error = new HttpError('Something went wrong, could not delete language', 500)
@@ -176,8 +208,64 @@ const saveWordsList = async (req, res, next) => {
   res.status(200).json({ languageData })
 }
 
+const createWordsPack = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { languageId } = req.params
+  const { wordsList } = req.body
+
+  let languageObj 
+
+  try {
+    languageObj = await Language.findById(languageId)
+  } catch (err) {
+    const error = new HttpError('Finding language failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!languageObj) {
+    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    return next(error)
+  } 
+
+  const wordsArr = wordsPackArrPreparer(wordsList)
+
+  if (wordsArr.length < 20) {
+    const error = new HttpError('There must be at least 20 words in your wordsList to create a wordsPack', 404) 
+    return next(error)
+  }
+
+  const updatedWordsPackNumber = (languageObj.config.lastWordsPackNumber + 0.1).toFixed(1)
+  languageObj.config.lastWordsPackNumber = updatedWordsPackNumber
+  
+  const newWordsPack = new WordsPack({ 
+    title: `${ languageObj.title } W. ${ updatedWordsPackNumber }`,
+    words: wordsArr,
+    language: languageObj._id
+  })
+
+  languageObj.wordsList = packedWordsRemover(wordsList)
+  languageObj.wordsPacks.push(newWordsPack)
+
+  try {
+    await newWordsPack.save()
+    await languageObj.save()
+  } catch (err) {
+    const error = new HttpError('Creating words pack failed, please try again later.', 404) 
+    return next(error)
+  }
+
+  const languageData = {
+    languageTitle: { _id: languageObj._id, title: languageObj.title },
+    wordsList: languageObj.wordsList,
+    wordsPack: newWordsPack
+  }
+
+  res.status(200).json({ languageData })
+}
+
 exports.getLanguages = getLanguages
 exports.getLanguageById = getLanguageById
 exports.createLanguage = createLanguage
 exports.deleteLanguage = deleteLanguage
 exports.saveWordsList = saveWordsList
+exports.createWordsPack = createWordsPack
