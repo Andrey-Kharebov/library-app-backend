@@ -1,5 +1,8 @@
 // Commits
 
+17. wordLevelUp & wordLevelDown func. + fix
+  - during wordsPack creating new words arr now returns to _id fix
+
 16. Added words model and it's func.
   - now words creating in createWordsPack function
   - and deleting when deleting parent language

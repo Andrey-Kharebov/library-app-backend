@@ -4,7 +4,8 @@ const WordSchema = new Schema({
   word: { type: String, required: true, lowercase: true, trim: true },
   translation: { type: String, required: true, lowercase: true, trim: true },
   example: { type: String, required: true, trim: true },
-  language: { type: Types.ObjectId, required: true, ref: 'Language' }
+  language: { type: Types.ObjectId, required: true, ref: 'Language' },
+  level: { type: Number }
 })
 
 module.exports = model('Word', WordSchema)

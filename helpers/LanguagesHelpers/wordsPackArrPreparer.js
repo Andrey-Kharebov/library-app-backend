@@ -2,12 +2,11 @@ const wordsPackArrPreparer = (wordsList, languageId) => {
   const wordsArr = wordsList.trim().split('\n').filter(str => str !== '').splice(0, 20)
     .map((str, idx) => {
       return {
-        // id: idx + 1,
         word: str.split(' - ')[0],
         translation: str.split(' - ')[1].split(' // ')[0],
         example: str.split(' // ')[1],
+        level: 0,
         language: languageId
-        // level: 1
       }
     })
   

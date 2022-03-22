@@ -116,6 +116,7 @@ const createLanguage = async (req, res, next) => {
   const newLanguage = new Language({
     title,
     wordsList: '',
+    words: [],
     wordsPacks: [],
     creator: user._id,
     config: {
@@ -229,29 +230,37 @@ const createWordsPack = async (req, res, next) => {
     return next(error)
   } 
 
-  const wordsArr = wordsPackArrPreparer(wordsList, languageObj._id)
+  let wordsArr = wordsPackArrPreparer(wordsList, languageObj._id)
 
   if (wordsArr.length < 20) {
     const error = new HttpError('There must be at least 20 words in your wordsList to create a wordsPack', 404) 
     return next(error)
   }
 
+  try {
+    wordsArr = await Word.insertMany(wordsArr)
+  } catch (err) {
+    const error = new HttpError('Creating words failed, please try again later.', 404) 
+    return next(error)
+  }
+
   const updatedWordsPackNumber = (languageObj.config.lastWordsPackNumber + 0.1).toFixed(1)
   languageObj.config.lastWordsPackNumber = updatedWordsPackNumber
-  
+
   const newWordsPack = new WordsPack({ 
     title: `${ languageObj.title } W. ${ updatedWordsPackNumber }`,
     words: wordsArr.map(w => {
-      return {...w, level: 1}
+      w.level = 1
+      return w
     }),
     language: languageObj._id
   })
 
   languageObj.wordsList = packedWordsRemover(wordsList)
   languageObj.wordsPacks.push(newWordsPack)
+  languageObj.words.push(...wordsArr.map(w => w._id))
 
   try {
-    await Word.insertMany(wordsArr)
     await newWordsPack.save()
     await languageObj.save()
   } catch (err) {
@@ -268,9 +277,99 @@ const createWordsPack = async (req, res, next) => {
   res.status(200).json({ languageData })
 }
 
+const wordLevelUp = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { wordsPackId } = req.params
+  const { wordId } = req.body
+
+  let wordsPack 
+
+  try {
+    wordsPack = await WordsPack.findById(wordsPackId)
+  } catch (err) {
+    const error = new HttpError('Finding words pack failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!wordsPack) {
+    const error = new HttpError('Could not find a words pack for the provided id.', 404) 
+    return next(error)
+  } 
+
+  wordsPack.words = wordsPack.words.map(w => {
+    if (w._id.toString() === wordId) {
+      w.level = w.level + 1
+      return w 
+    } else {
+      return w
+    }
+  })
+
+  
+  try {
+    await wordsPack.save()
+  } catch (err) {
+    console.log(err)
+    const error = new HttpError('Words level up failed, please try again later.', 404) 
+    return next(error)
+  }
+  
+  const languageData = {
+    wordsPack
+  }
+
+  res.status(200).json({ languageData })
+}
+
+const wordLevelDown = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { wordsPackId } = req.params
+  const { wordId } = req.body
+
+  let wordsPack 
+
+  try {
+    wordsPack = await WordsPack.findById(wordsPackId)
+  } catch (err) {
+    const error = new HttpError('Finding words pack failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!wordsPack) {
+    const error = new HttpError('Could not find a words pack for the provided id.', 404) 
+    return next(error)
+  } 
+
+  wordsPack.words = wordsPack.words.map(w => {
+    if (w._id.toString() === wordId) {
+      w.level = w.level - 1
+      return w 
+    } else {
+      return w
+    }
+  })
+
+  
+  try {
+    await wordsPack.save()
+  } catch (err) {
+    console.log(err)
+    const error = new HttpError('Words level up failed, please try again later.', 404) 
+    return next(error)
+  }
+  
+  const languageData = {
+    wordsPack
+  }
+
+  res.status(200).json({ languageData })
+}
+
 exports.getLanguages = getLanguages
 exports.getLanguageById = getLanguageById
 exports.createLanguage = createLanguage
 exports.deleteLanguage = deleteLanguage
 exports.saveWordsList = saveWordsList
 exports.createWordsPack = createWordsPack
+exports.wordLevelUp = wordLevelUp
+exports.wordLevelDown = wordLevelDown
