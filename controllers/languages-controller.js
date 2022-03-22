@@ -6,6 +6,7 @@ const packedWordsRemover = require('../helpers/LanguagesHelpers/packedWordsRemov
 
 const User = require('../models/user')
 const Language = require('../models/languages/language')
+const Word = require('../models/languages/word' )
 const WordsPack = require('../models/languages/wordsPack')
 
 const getLanguages = async (req, res, next) => { 
@@ -162,6 +163,7 @@ const deleteLanguage = async (req, res, next) => {
   try {
     await languageObj.creator.languages.pull(languageObj)
     await languageObj.creator.save()
+    await Word.deleteMany({ language: languageObj._id })
     await WordsPack.deleteMany({ language: languageObj._id })
     await languageObj.remove()
   } catch (err) {
@@ -227,7 +229,7 @@ const createWordsPack = async (req, res, next) => {
     return next(error)
   } 
 
-  const wordsArr = wordsPackArrPreparer(wordsList)
+  const wordsArr = wordsPackArrPreparer(wordsList, languageObj._id)
 
   if (wordsArr.length < 20) {
     const error = new HttpError('There must be at least 20 words in your wordsList to create a wordsPack', 404) 
@@ -239,7 +241,9 @@ const createWordsPack = async (req, res, next) => {
   
   const newWordsPack = new WordsPack({ 
     title: `${ languageObj.title } W. ${ updatedWordsPackNumber }`,
-    words: wordsArr,
+    words: wordsArr.map(w => {
+      return {...w, level: 1}
+    }),
     language: languageObj._id
   })
 
@@ -247,6 +251,7 @@ const createWordsPack = async (req, res, next) => {
   languageObj.wordsPacks.push(newWordsPack)
 
   try {
+    await Word.insertMany(wordsArr)
     await newWordsPack.save()
     await languageObj.save()
   } catch (err) {

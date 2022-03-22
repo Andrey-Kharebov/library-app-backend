@@ -1,5 +1,9 @@
 // Commits
 
+16. Added words model and it's func.
+  - now words creating in createWordsPack function
+  - and deleting when deleting parent language
+
 15. Added creating words pack func.
   - added wordsPack model 
   - added packedWordsRemover & wordsPackArrPreparer helpers
