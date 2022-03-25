@@ -3,6 +3,7 @@ const HttpError = require('../helpers/http-error')
 const wordsListSeparator = require('../helpers/LanguagesHelpers/wordsListSeparator')
 const wordsPackArrPreparer = require('../helpers/LanguagesHelpers/wordsPackArrPreparer')
 const packedWordsRemover = require('../helpers/LanguagesHelpers/packedWordsRemover')
+const addFinishedPackWordsToWordsList = require('../helpers/LanguagesHelpers/addFinishedPackWordsToWordsList')
 
 const User = require('../models/user')
 const Language = require('../models/languages/language')
@@ -195,7 +196,7 @@ const saveWordsList = async (req, res, next) => {
   
 
   languageObj.wordsList =  wordsListSeparator(wordsList)
-  
+    
   try {
     await languageObj.save()
   } catch (err) {
@@ -348,7 +349,6 @@ const wordLevelDown = async (req, res, next) => {
       return w
     }
   })
-
   
   try {
     await wordsPack.save()
@@ -365,6 +365,47 @@ const wordLevelDown = async (req, res, next) => {
   res.status(200).json({ languageData })
 }
 
+const finishPack = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { wordsPackId } = req.params
+  const { words } = req.body
+
+  let wordsPack 
+  let languageObj
+
+  try {
+    wordsPack = await WordsPack.findById(wordsPackId).populate('language')
+  } catch (err) {
+    const error = new HttpError('Finding words pack failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!wordsPack) {
+    const error = new HttpError('Could not find a words pack for the provided id.', 404) 
+    return next(error)
+  } 
+
+  const updatedWordsList = addFinishedPackWordsToWordsList(words, wordsPack.language.wordsList)
+  wordsPack.language.wordsList = updatedWordsList
+  wordsPack.language.wordsPacks.pull(wordsPack)
+
+  try {
+    await wordsPack.language.save()
+    await wordsPack.remove()
+  } catch (err) {
+    const error = new HttpError('Finishing pack failed, try again later.', 404) 
+    return next(error)
+  }
+
+  const languageData = {
+    languageTitle: { _id: wordsPack.language._id, title: wordsPack.language.title },
+    wordsPackId: wordsPack._id,
+    wordsList: updatedWordsList
+  }
+
+ res.status(200).json({ languageData })
+}
+
 exports.getLanguages = getLanguages
 exports.getLanguageById = getLanguageById
 exports.createLanguage = createLanguage
@@ -373,3 +414,4 @@ exports.saveWordsList = saveWordsList
 exports.createWordsPack = createWordsPack
 exports.wordLevelUp = wordLevelUp
 exports.wordLevelDown = wordLevelDown
+exports.finishPack = finishPack

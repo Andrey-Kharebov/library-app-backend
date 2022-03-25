@@ -5,7 +5,7 @@ const wordsListSeparator = wordsList => {
       : `${i.trim()}\n`
   }).join('')
 
-  return separatedWords
+  return separatedWords.trim()
 }
 
 module.exports = wordsListSeparator

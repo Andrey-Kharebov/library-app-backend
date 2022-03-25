@@ -1,5 +1,8 @@
 // Commits
 
+18. Added finishPack route 
+  - funct. to add words to wordslist for relearning
+
 17. wordLevelUp & wordLevelDown func. + fix
   - during wordsPack creating new words arr now returns to _id fix
 

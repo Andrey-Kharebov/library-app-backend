@@ -16,8 +16,7 @@ router.patch('/:languageId/wordsList', languagesController.saveWordsList)
 router.post('/:languageId/wordsPack', languagesController.createWordsPack)
 router.patch('/:wordsPackId/wordLevelUp', languagesController.wordLevelUp)
 router.patch('/:wordsPackId/wordLevelDown', languagesController.wordLevelDown)
-
-// router.patch('/:wordsPack' )
+router.post('/:wordsPackId/finish', languagesController.finishPack)
 
 module.exports = router
 
