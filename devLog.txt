@@ -1,5 +1,7 @@
 // Commits
 
+19. Fixed problem with dublicating already existing words when pack creating
+
 18. Added finishPack route 
   - funct. to add words to wordslist for relearning
 

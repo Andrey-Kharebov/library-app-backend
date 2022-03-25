@@ -25,7 +25,6 @@ const getLanguages = async (req, res, next) => {
     return next(error)
   }
 
-
   if (languages) {
     try {
       firstLanguage = await Language.findOne()
@@ -218,9 +217,11 @@ const createWordsPack = async (req, res, next) => {
   const { wordsList } = req.body
 
   let languageObj 
+  let dbwords
 
   try {
     languageObj = await Language.findById(languageId)
+    dbwords = await Word.find({ language: languageId })
   } catch (err) {
     const error = new HttpError('Finding language failed, please try again later.', 500)
     return next(error)
@@ -237,6 +238,14 @@ const createWordsPack = async (req, res, next) => {
     const error = new HttpError('There must be at least 20 words in your wordsList to create a wordsPack', 404) 
     return next(error)
   }
+  
+  let existingArray = []
+
+  wordsArr = wordsArr.map(w => {
+    let existingWord = dbwords.find(dbw => dbw.word === w.word)
+    if (existingWord) existingArray.push(existingWord)
+    return existingWord ? null : w
+  }).filter(w => w !== null)
 
   try {
     wordsArr = await Word.insertMany(wordsArr)
@@ -244,13 +253,13 @@ const createWordsPack = async (req, res, next) => {
     const error = new HttpError('Creating words failed, please try again later.', 404) 
     return next(error)
   }
-
+  const completedWordsArr = [...existingArray, ...wordsArr]
   const updatedWordsPackNumber = (languageObj.config.lastWordsPackNumber + 0.1).toFixed(1)
   languageObj.config.lastWordsPackNumber = updatedWordsPackNumber
 
   const newWordsPack = new WordsPack({ 
     title: `${ languageObj.title } W. ${ updatedWordsPackNumber }`,
-    words: wordsArr.map(w => {
+    words: completedWordsArr.map(w => {
       w.level = 1
       return w
     }),
