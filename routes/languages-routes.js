@@ -19,7 +19,9 @@ router.patch('/:wordsPackId/wordLevelDown', languagesController.wordLevelDown)
 router.post('/:wordsPackId/finish', languagesController.finishPack)
 
 router.post('/:languageId/wordsSuggestion', languagesController.wordsSuggestion)
-
+router.post('/:languageId/words', languagesController.words)
+router.patch('/:languageId/words', languagesController.saveWord)
+router.delete('/:languageId/words', languagesController.deleteWord)
 
 module.exports = router
 

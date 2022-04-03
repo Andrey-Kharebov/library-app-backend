@@ -172,7 +172,7 @@ const deleteLanguage = async (req, res, next) => {
     return next(error)
   }
 
-  res.status(200).json({ message: 'Language have been successfully deleted.' })
+  res.status(200).json({ message: 'Has have been successfully deleted.' })
 }
 
 const saveWordsList = async (req, res, next) => {
@@ -281,7 +281,8 @@ const createWordsPack = async (req, res, next) => {
   const languageData = {
     languageTitle: { _id: languageObj._id, title: languageObj.title },
     wordsList: languageObj.wordsList,
-    wordsPack: newWordsPack
+    wordsPack: newWordsPack,
+    words: languageObj.words
   }
 
   res.status(200).json({ languageData })
@@ -450,6 +451,143 @@ const wordsSuggestion = async (req, res, next) => {
   res.status(200).json({ languageData })
 } 
 
+const words = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { languageId } = req.params
+  const { wordsId } = req.body
+
+  let dbwords
+  let languageObj 
+
+  try {
+    languageObj = await Language.findById(languageId).select('title')
+  } catch (err) {
+    const error = new HttpError('Finding language failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!languageObj) {
+    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    return next(error)
+  } 
+
+  try {
+    dbwords = await Word.find({'_id': { $in: wordsId }})
+  } catch (err) {
+    const error = new HttpError('Finding language failed, please try again later.', 500)
+    return next(error)
+  } 
+
+  const languageData = {
+    languageTitle: { _id: languageObj._id, title: languageObj.title },
+    words: dbwords
+  }
+
+  res.status(200).json({ languageData })
+}
+
+const saveWord = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { languageId } = req.params
+  const { word } = req.body
+  
+  let dbword 
+  let languageObj
+
+  try {
+    languageObj = await Language.findById(languageId).select('title')
+  } catch (err) {
+    const error = new HttpError('Finding language failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!languageObj) {
+    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    return next(error)
+  } 
+  
+  try {
+    dbword = await Word.findById(word._id)
+  } catch (err) {
+    const error = new HttpError('Finding word failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!dbword) {
+    const error = new HttpError('Could not find a word for the provided id.', 404) 
+    return next(error)
+  } 
+
+  dbword.word = word.word
+  dbword.translation = word.translation
+  dbword.example = word.example
+
+  try {
+    await dbword.save()
+  } catch (err) {
+    const error = new HttpError('Finishing pack failed, try again later.', 404) 
+    return next(error)
+  }
+
+  const languageData = {
+    languageTitle: { _id: languageObj._id, title: languageObj.title },
+    word: dbword
+  }
+
+  res.status(200).json({ languageData })
+}
+
+const deleteWord = async (req, res, next) => {
+  const userId = req.userData.userId
+  const { languageId } = req.params
+  const { word } = req.body
+  
+  let dbword 
+  let languageObj
+
+  try {
+    languageObj = await Language.findById(languageId).select('title')
+  } catch (err) {
+    const error = new HttpError('Finding language failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!languageObj) {
+    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    return next(error)
+  } 
+  
+  try {
+    dbword = await Word.findById(word._id).populate('language')
+  } catch (err) {
+    const error = new HttpError('Finding word failed, please try again later.', 500)
+    return next(error)
+  }
+
+  if (!dbword) {
+    const error = new HttpError('Could not find a word for the provided id.', 404) 
+    return next(error)
+  } 
+
+  dbword.language.words.pull(dbword)
+
+  try {
+    await dbword.language.save()
+    await dbword.remove()
+  } catch (err) {
+    const error = new HttpError('Something went wrong, could not delete word', 500) 
+    return next(error)
+  }
+
+  const languageData = {
+    languageTitle: { _id: languageObj._id, title: languageObj.title },
+    word: dbword
+  }
+
+  res.status(200).json({ languageData })
+}
+
+
 exports.getLanguages = getLanguages
 exports.getLanguageById = getLanguageById
 exports.createLanguage = createLanguage
@@ -460,3 +598,6 @@ exports.wordLevelUp = wordLevelUp
 exports.wordLevelDown = wordLevelDown
 exports.finishPack = finishPack
 exports.wordsSuggestion = wordsSuggestion
+exports.words = words
+exports.saveWord = saveWord
+exports.deleteWord = deleteWord
