@@ -9,8 +9,6 @@ router.use(checkAuth) // all routes below can be reached only if token is valid
 router.get('/', languagesController.fetchLanguages)
 router.post('/', languagesController.createLanguage)
 router.get('/:languageId', languagesController.fetchLanguageObj)
-
-
 router.patch('/:languageId/wordsList', languagesController.saveWordsList)
 
 router.post('/:languageId/wordsPack', languagesController.createWordsPack)

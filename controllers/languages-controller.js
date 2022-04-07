@@ -253,7 +253,41 @@ const fetchLanguageObj = async (req, res, next) => {
   res.status(200).json({ langData })
 }
 
+// const saveWordsList = async (req, res, next) => {
+//   const { languageId } = req.params
+//   const { wordsList } = req.body
 
+//   let languageObj 
+
+//   try {
+//     languageObj = await Language.findById(languageId)
+//   } catch (err) {
+//     const error = new HttpError('Finding language failed, please try again later.', 500)
+//     return next(error)
+//   }
+
+//   if (!languageObj) {
+//     const error = new HttpError('Could not find a language for the provided id.', 404) 
+//     return next(error)
+//   } 
+  
+
+//   languageObj.wordsList =  wordsListSeparator(wordsList)
+    
+//   try {
+//     await languageObj.save()
+//   } catch (err) {
+//     const error = new HttpError('Words list updating failed, please try again later.', 404) 
+//     return next(error)
+//   }
+
+//   const languageData = {
+//     languageTitle: { _id: languageObj._id, title: languageObj.title },
+//     wordsList: languageObj.wordsList
+//   }
+  
+//   res.status(200).json({ languageData })
+// }
 
 
 
@@ -266,15 +300,14 @@ const saveWordsList = async (req, res, next) => {
   try {
     languageObj = await Language.findById(languageId)
   } catch (err) {
-    const error = new HttpError('Finding language failed, please try again later.', 500)
+    const error = new HttpError('Fetching language failed, please try again later.', 500)
     return next(error)
   }
 
   if (!languageObj) {
-    const error = new HttpError('Could not find a language for the provided id.', 404) 
+    const error = new HttpError('Could not find language for provided id.', 404) 
     return next(error)
   } 
-  
 
   languageObj.wordsList =  wordsListSeparator(wordsList)
     
@@ -285,12 +318,12 @@ const saveWordsList = async (req, res, next) => {
     return next(error)
   }
 
-  const languageData = {
-    languageTitle: { _id: languageObj._id, title: languageObj.title },
+  const langData = {
+    langTitle: { _id: languageObj._id, title: languageObj.title },
     wordsList: languageObj.wordsList
   }
-  
-  res.status(200).json({ languageData })
+
+  res.status(200).json({ langData })
 }
 
 const createWordsPack = async (req, res, next) => {
@@ -713,8 +746,8 @@ const deleteLanguage = async (req, res, next) => {
 exports.fetchLanguages = fetchLanguages
 exports.createLanguage = createLanguage
 exports.fetchLanguageObj = fetchLanguageObj
-
 exports.saveWordsList = saveWordsList
+
 exports.createWordsPack = createWordsPack
 exports.wordLevelUp = wordLevelUp
 exports.wordLevelDown = wordLevelDown

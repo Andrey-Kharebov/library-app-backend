@@ -1,4 +1,7 @@
 // Commits
+23. Refactoring_v2
+  - rewrited saveWordsList
+
 22. Refactoring
   - rewrited fetchLanguages, createLanguage, fetchLanguageObj functions
 
