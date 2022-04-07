@@ -1,4 +1,7 @@
 // Commits
+22. Refactoring
+  - rewrited fetchLanguages, createLanguage, fetchLanguageObj functions
+
 21. Added save & delete word functionality * fix mongoDB connection problem
   - added save & delete routes
   - changed mongodb://localhost:27017/library-app to mongodb://0.0.0.0:27017/library-app
