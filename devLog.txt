@@ -1,4 +1,6 @@
 // Commits
+25. Refactoring_v4
+  - rewrited words card func.
 
 24. Refactoring_v3
   - rewrited createWordsPack

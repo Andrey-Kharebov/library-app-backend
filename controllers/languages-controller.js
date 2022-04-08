@@ -490,10 +490,49 @@ const createWordsPack = async (req, res, next) => {
   res.status(200).json({ langData })
 }
 
+// const wordLevelUp = async (req, res, next) => {
+//   const userId = req.userData.userId
+//   const { wordsPackId } = req.params
+//   const { wordId } = req.body
 
+//   let wordsPack 
 
+//   try {
+//     wordsPack = await WordsPack.findById(wordsPackId)
+//   } catch (err) {
+//     const error = new HttpError('Finding words pack failed, please try again later.', 500)
+//     return next(error)
+//   }
 
+//   if (!wordsPack) {
+//     const error = new HttpError('Could not find a words pack for the provided id.', 404) 
+//     return next(error)
+//   } 
 
+//   wordsPack.words = wordsPack.words.map(w => {
+//     if (w._id.toString() === wordId) {
+//       w.level = w.level + 1
+//       return w 
+//     } else {
+//       return w
+//     }
+//   })
+
+  
+//   try {
+//     await wordsPack.save()
+//   } catch (err) {
+//     console.log(err)
+//     const error = new HttpError('Words level up failed, please try again later.', 404) 
+//     return next(error)
+//   }
+  
+//   const languageData = {
+//     wordsPack
+//   }
+
+//   res.status(200).json({ languageData })
+// }
 
 const wordLevelUp = async (req, res, next) => {
   const userId = req.userData.userId
@@ -512,7 +551,7 @@ const wordLevelUp = async (req, res, next) => {
   if (!wordsPack) {
     const error = new HttpError('Could not find a words pack for the provided id.', 404) 
     return next(error)
-  } 
+  }
 
   wordsPack.words = wordsPack.words.map(w => {
     if (w._id.toString() === wordId) {
@@ -522,7 +561,6 @@ const wordLevelUp = async (req, res, next) => {
       return w
     }
   })
-
   
   try {
     await wordsPack.save()
@@ -532,12 +570,57 @@ const wordLevelUp = async (req, res, next) => {
     return next(error)
   }
   
-  const languageData = {
+  const langData = {
     wordsPack
   }
 
-  res.status(200).json({ languageData })
+  res.status(200).json({ langData })
 }
+
+// const wordLevelDown = async (req, res, next) => {
+//   const userId = req.userData.userId
+//   const { wordsPackId } = req.params
+//   const { wordId } = req.body
+
+//   let wordsPack 
+
+//   try {
+//     wordsPack = await WordsPack.findById(wordsPackId)
+//   } catch (err) {
+//     const error = new HttpError('Finding words pack failed, please try again later.', 500)
+//     return next(error)
+//   }
+
+//   if (!wordsPack) {
+//     const error = new HttpError('Could not find a words pack for the provided id.', 404) 
+//     return next(error)
+//   } 
+
+//   wordsPack.words = wordsPack.words.map(w => {
+//     if (w._id.toString() === wordId) {
+//       w.level = w.level - 1
+//       return w 
+//     } else {
+//       return w
+//     }
+//   })
+  
+//   try {
+//     await wordsPack.save()
+//   } catch (err) {
+//     console.log(err)
+//     const error = new HttpError('Words level up failed, please try again later.', 404) 
+//     return next(error)
+//   }
+
+//   let existingArray = []
+  
+//   const languageData = {
+//     wordsPack
+//   }
+
+//   res.status(200).json({ languageData })
+// }
 
 const wordLevelDown = async (req, res, next) => {
   const userId = req.userData.userId
@@ -574,15 +657,54 @@ const wordLevelDown = async (req, res, next) => {
     const error = new HttpError('Words level up failed, please try again later.', 404) 
     return next(error)
   }
-
-  let existingArray = []
   
-  const languageData = {
+  const langData = {
     wordsPack
   }
 
-  res.status(200).json({ languageData })
+  res.status(200).json({ langData })
 }
+
+// const finishPack = async (req, res, next) => {
+//   const userId = req.userData.userId
+//   const { wordsPackId } = req.params
+//   const { words } = req.body
+
+//   let wordsPack 
+//   let languageObj
+
+//   try {
+//     wordsPack = await WordsPack.findById(wordsPackId).populate('language')
+//   } catch (err) {
+//     const error = new HttpError('Finding words pack failed, please try again later.', 500)
+//     return next(error)
+//   }
+
+//   if (!wordsPack) {
+//     const error = new HttpError('Could not find a words pack for the provided id.', 404) 
+//     return next(error)
+//   } 
+
+//   const updatedWordsList = addFinishedPackWordsToWordsList(words, wordsPack.language.wordsList)
+//   wordsPack.language.wordsList = updatedWordsList
+//   wordsPack.language.wordsPacks.pull(wordsPack)
+
+//   try {
+//     await wordsPack.language.save()
+//     await wordsPack.remove()
+//   } catch (err) {
+//     const error = new HttpError('Finishing pack failed, try again later.', 404) 
+//     return next(error)
+//   }
+
+//   const languageData = {
+//     languageTitle: { _id: wordsPack.language._id, title: wordsPack.language.title },
+//     wordsPackId: wordsPack._id,
+//     wordsList: updatedWordsList
+//   }
+
+//  res.status(200).json({ languageData })
+// }
 
 const finishPack = async (req, res, next) => {
   const userId = req.userData.userId
@@ -590,7 +712,6 @@ const finishPack = async (req, res, next) => {
   const { words } = req.body
 
   let wordsPack 
-  let languageObj
 
   try {
     wordsPack = await WordsPack.findById(wordsPackId).populate('language')
@@ -602,7 +723,7 @@ const finishPack = async (req, res, next) => {
   if (!wordsPack) {
     const error = new HttpError('Could not find a words pack for the provided id.', 404) 
     return next(error)
-  } 
+  }   
 
   const updatedWordsList = addFinishedPackWordsToWordsList(words, wordsPack.language.wordsList)
   wordsPack.language.wordsList = updatedWordsList
@@ -616,14 +737,17 @@ const finishPack = async (req, res, next) => {
     return next(error)
   }
 
-  const languageData = {
-    languageTitle: { _id: wordsPack.language._id, title: wordsPack.language.title },
+  const langData = {
+    langTitle: { _id: wordsPack.language._id, title: wordsPack.language.title },
     wordsPackId: wordsPack._id,
     wordsList: updatedWordsList
   }
 
- res.status(200).json({ languageData })
+  res.status(200).json({ langData })
 }
+
+
+
 
 const wordsSuggestion = async (req, res, next) => {
   const userId = req.userData.userId
