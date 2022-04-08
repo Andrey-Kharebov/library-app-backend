@@ -1,4 +1,8 @@
 // Commits
+
+24. Refactoring_v3
+  - rewrited createWordsPack
+  
 23. Refactoring_v2
   - rewrited saveWordsList
 
