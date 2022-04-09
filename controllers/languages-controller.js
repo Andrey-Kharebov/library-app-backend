@@ -746,7 +746,40 @@ const finishPack = async (req, res, next) => {
   res.status(200).json({ langData })
 }
 
+// const wordsSuggestion = async (req, res, next) => {
+//   const userId = req.userData.userId
+//   const { languageId } = req.params
+//   const { word } = req.body
+  
+//   let languageObj 
+//   let words 
 
+//   try {
+//     languageObj = await Language.findById(languageId).select('title')
+//   } catch (err) {
+//     const error = new HttpError('Finding language failed, please try again later.', 500)
+//     return next(error)
+//   }
+
+//   if (!languageObj) {
+//     const error = new HttpError('Could not find a language for the provided id.', 404) 
+//     return next(error)
+//   } 
+  
+//   try {
+//     words = await Word.find({ language: languageId, word: { $regex: word } })
+//   } catch (err) {
+//     const error = new HttpError('Finding words failed, please try again later.', 500)
+//     return next(error)
+//   }
+
+//   const languageData = {
+//     languageTitle: { _id: languageObj._id, title: languageObj.title },
+//     words: words
+//   }
+
+//   res.status(200).json({ languageData })
+// } 
 
 
 const wordsSuggestion = async (req, res, next) => {
@@ -768,7 +801,7 @@ const wordsSuggestion = async (req, res, next) => {
     const error = new HttpError('Could not find a language for the provided id.', 404) 
     return next(error)
   } 
-  
+
   try {
     words = await Word.find({ language: languageId, word: { $regex: word } })
   } catch (err) {
@@ -776,13 +809,15 @@ const wordsSuggestion = async (req, res, next) => {
     return next(error)
   }
 
-  const languageData = {
-    languageTitle: { _id: languageObj._id, title: languageObj.title },
+  const langData = {
+    langTitle: { _id: languageObj._id, title: languageObj.title },
     words: words
   }
 
-  res.status(200).json({ languageData })
+  res.status(200).json({ langData })
 } 
+
+
 
 const words = async (req, res, next) => {
   const userId = req.userData.userId

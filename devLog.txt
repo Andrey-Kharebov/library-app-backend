@@ -1,4 +1,7 @@
 // Commits
+26. Refactoring_v5
+  - rewrited wordsSuggestion func.
+
 25. Refactoring_v4
   - rewrited words card func.
 
