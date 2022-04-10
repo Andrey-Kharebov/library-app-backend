@@ -1,4 +1,7 @@
 // Commits
+27. Refactoring_v6
+  - rewrited words search func.
+
 26. Refactoring_v5
   - rewrited wordsSuggestion func.
 

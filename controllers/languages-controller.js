@@ -446,8 +446,21 @@ const createWordsPack = async (req, res, next) => {
     let existingWord = dbwords.find(dbw => dbw.word === w.word)
     if (existingWord) existingArray.push(existingWord)
     return existingWord ? null : w
-  }).filter(w => w !== null)
+  })
+    .filter(w => w !== null) // removes all null's
+    .filter((value, index, self) => 
+      index === self.findIndex((i) => (
+        i.word === value.word && i.translation === value.translation // removes all dublicates
+      ))
+    )
 
+  existingArray = existingArray
+    .filter((value, index, self) => 
+      index === self.findIndex((i) => (
+        i.word === value.word && i.translation === value.translation // removes all dublicates
+      ))
+    )
+  
   try {
     wordsArr = await Word.insertMany(wordsArr)
   } catch (err) {
@@ -456,6 +469,15 @@ const createWordsPack = async (req, res, next) => {
   }
 
   const completedWordsArr = [...existingArray, ...wordsArr]
+  console.log(wordsArr.length)
+  console.log(existingArray.length)
+  console.log(completedWordsArr.length)
+
+  if (completedWordsArr.length < 20) {
+    const error = new HttpError('There must be at least 20 UNIQUE words in your wordsList to create a wordsPack. Check for dublicates.', 404) 
+    return next(error)
+  }
+  
   const updatedWordsPackNumber = (languageObj.config.lastWordsPackNumber + 0.1).toFixed(1)
   languageObj.config.lastWordsPackNumber = updatedWordsPackNumber
 
@@ -488,6 +510,7 @@ const createWordsPack = async (req, res, next) => {
   }
 
   res.status(200).json({ langData })
+  // res.status(200)
 }
 
 // const wordLevelUp = async (req, res, next) => {
@@ -782,7 +805,7 @@ const finishPack = async (req, res, next) => {
 // } 
 
 
-const wordsSuggestion = async (req, res, next) => {
+const searchWords = async (req, res, next) => {
   const userId = req.userData.userId
   const { languageId } = req.params
   const { word } = req.body
@@ -817,50 +840,64 @@ const wordsSuggestion = async (req, res, next) => {
   res.status(200).json({ langData })
 } 
 
+// const saveWord = async (req, res, next) => {
+//   const userId = req.userData.userId
+//   const { languageId } = req.params
+//   const { word } = req.body
+  
+//   let dbword 
+//   let languageObj
 
+//   try {
+//     languageObj = await Language.findById(languageId).select('title')
+//   } catch (err) {
+//     const error = new HttpError('Finding language failed, please try again later.', 500)
+//     return next(error)
+//   }
 
-const words = async (req, res, next) => {
-  const userId = req.userData.userId
-  const { languageId } = req.params
-  const { wordsId } = req.body
+//   if (!languageObj) {
+//     const error = new HttpError('Could not find a language for the provided id.', 404) 
+//     return next(error)
+//   } 
+  
+//   try {
+//     dbword = await Word.findById(word._id)
+//   } catch (err) {
+//     const error = new HttpError('Finding word failed, please try again later.', 500)
+//     return next(error)
+//   }
 
-  let dbwords
-  let languageObj 
+//   if (!dbword) {
+//     const error = new HttpError('Could not find a word for the provided id.', 404) 
+//     return next(error)
+//   } 
 
-  try {
-    languageObj = await Language.findById(languageId).select('title')
-  } catch (err) {
-    const error = new HttpError('Finding language failed, please try again later.', 500)
-    return next(error)
-  }
+//   dbword.word = word.word
+//   dbword.translation = word.translation
+//   dbword.example = word.example
 
-  if (!languageObj) {
-    const error = new HttpError('Could not find a language for the provided id.', 404) 
-    return next(error)
-  } 
+//   try {
+//     await dbword.save()
+//   } catch (err) {
+//     const error = new HttpError('Finishing pack failed, try again later.', 404) 
+//     return next(error)
+//   }
 
-  try {
-    dbwords = await Word.find({'_id': { $in: wordsId }})
-  } catch (err) {
-    const error = new HttpError('Finding language failed, please try again later.', 500)
-    return next(error)
-  } 
+//   const languageData = {
+//     languageTitle: { _id: languageObj._id, title: languageObj.title },
+//     word: dbword
+//   }
 
-  const languageData = {
-    languageTitle: { _id: languageObj._id, title: languageObj.title },
-    words: dbwords
-  }
-
-  res.status(200).json({ languageData })
-}
+//   res.status(200).json({ languageData })
+// }
 
 const saveWord = async (req, res, next) => {
   const userId = req.userData.userId
   const { languageId } = req.params
   const { word } = req.body
-  
-  let dbword 
+
   let languageObj
+  let dbword
 
   try {
     languageObj = await Language.findById(languageId).select('title')
@@ -873,7 +910,7 @@ const saveWord = async (req, res, next) => {
     const error = new HttpError('Could not find a language for the provided id.', 404) 
     return next(error)
   } 
-  
+
   try {
     dbword = await Word.findById(word._id)
   } catch (err) {
@@ -889,7 +926,7 @@ const saveWord = async (req, res, next) => {
   dbword.word = word.word
   dbword.translation = word.translation
   dbword.example = word.example
-
+  
   try {
     await dbword.save()
   } catch (err) {
@@ -897,19 +934,20 @@ const saveWord = async (req, res, next) => {
     return next(error)
   }
 
-  const languageData = {
-    languageTitle: { _id: languageObj._id, title: languageObj.title },
+  const langData = {
+    langTitle: { _id: languageObj._id, title: languageObj.title },
     word: dbword
   }
 
-  res.status(200).json({ languageData })
+  res.status(200).json({ langData })
 }
 
 const deleteWord = async (req, res, next) => {
   const userId = req.userData.userId
   const { languageId } = req.params
   const { word } = req.body
-  
+
+  console.log(languageId, word)
   let dbword 
   let languageObj
 
@@ -947,20 +985,13 @@ const deleteWord = async (req, res, next) => {
     return next(error)
   }
 
-  const languageData = {
-    languageTitle: { _id: languageObj._id, title: languageObj.title },
+  const langData = {
+    langTitle: { _id: languageObj._id, title: languageObj.title },
     word: dbword
   }
 
-  res.status(200).json({ languageData })
+  res.status(200).json({ langData })
 }
-
-
-
-
-
-
-
 
 const deleteLanguage = async (req, res, next) => {
   const userId = req.userData.userId
@@ -1000,17 +1031,12 @@ exports.fetchLanguages = fetchLanguages
 exports.createLanguage = createLanguage
 exports.fetchLanguageObj = fetchLanguageObj
 exports.saveWordsList = saveWordsList
-
 exports.createWordsPack = createWordsPack
 exports.wordLevelUp = wordLevelUp
 exports.wordLevelDown = wordLevelDown
 exports.finishPack = finishPack
-exports.wordsSuggestion = wordsSuggestion
-exports.words = words
+exports.searchWords = searchWords
 exports.saveWord = saveWord
 exports.deleteWord = deleteWord
-
-
-
 
 exports.deleteLanguage = deleteLanguage
