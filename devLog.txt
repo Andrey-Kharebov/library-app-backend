@@ -1,4 +1,7 @@
 // Commits
+
+28. Removed comments
+
 27. Refactoring_v6
   - rewrited words search func.
 
