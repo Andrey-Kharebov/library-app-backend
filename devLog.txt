@@ -1,5 +1,7 @@
 // Commits
 
+29. Added tryCatchHandler 
+
 28. Removed comments
 
 27. Refactoring_v6
