@@ -1,6 +1,6 @@
 // Commits
 
-29. Added tryCatchHandler 
+29. removed tryCatchHandler
 
 28. Removed comments
 
