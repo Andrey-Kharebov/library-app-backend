@@ -5,7 +5,7 @@ const HttpError = require('../helpers/http-error')
 
 module.exports = (req, res, next) => {
   try {
-    if (req.method === 'OPTIONS') { // when we use 'POST', then method will be OPTIONS / Udemy Mern 12 - 180
+    if (req.method === 'OPTIONS') { // when we use 'POST', then method will be OPTIONS / Udemy Mern 12 - 181
       return next()
     }
     // we allowed 'Authorization' header in CORS settings (not key sensitive)

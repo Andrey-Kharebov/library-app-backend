@@ -472,6 +472,7 @@ const saveWord = async (req, res, next) => {
 
   let languageObj
   let dbword
+  let wordsPacks
 
   try {
     languageObj = await Language.findById(languageId).select('title')
@@ -500,9 +501,33 @@ const saveWord = async (req, res, next) => {
   dbword.word = word.word
   dbword.translation = word.translation
   dbword.example = word.example
-  
+
+  try {
+    wordsPacks = await WordsPack.find({ language: languageObj._id, 'words._id': dbword._id })
+  } catch (err) {
+    const error = new HttpError('Fetching words packs failed, please try again later.', 500)
+    return next(error)
+  }
+
+  wordsPacks = wordsPacks.map(wp => {
+    let words = [...wp.words] 
+
+    words = words.map(w => {
+      if (w._id === word._id) {
+        return { _id: w._id, word: word.word, translation: word.translation, example: word.example, level: w.level }
+      } else {
+        return w
+      }
+    })
+
+    wp.words = words 
+    return wp
+  })
+
+
   try {
     await dbword.save()
+    wordsPacks.forEach(async wp => await wp.save())
   } catch (err) {
     const error = new HttpError('Finishing pack failed, try again later.', 404) 
     return next(error)
@@ -510,7 +535,8 @@ const saveWord = async (req, res, next) => {
 
   const langData = {
     langTitle: { _id: languageObj._id, title: languageObj.title },
-    word: dbword
+    word: dbword,
+    wordsPacks: wordsPacks
   }
 
   res.status(200).json({ langData })
@@ -521,7 +547,6 @@ const deleteWord = async (req, res, next) => {
   const { languageId } = req.params
   const { word } = req.body
 
-  console.log(languageId, word)
   let dbword 
   let languageObj
 

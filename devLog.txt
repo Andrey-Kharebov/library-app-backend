@@ -1,5 +1,7 @@
 // Commits
 
+30. Added unpdating wordsPacks after word updating 
+
 29. removed tryCatchHandler
 
 28. Removed comments
